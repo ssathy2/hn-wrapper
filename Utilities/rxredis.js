@@ -2,8 +2,8 @@
 var redis;
 
 console.log(process.env);
-console.log(process.env.REDISTOGO_URL);
-if (process.env.REDISTOGO_URL) {
+console.log(process.env['REDISTOGO_URL']);
+if (process.env['REDISTOGO_URL']) {
     // TODO: redistogo connection
 	// inside if statement
 	var rtg   = require("url").parse(process.env.REDISTOGO_URL);
