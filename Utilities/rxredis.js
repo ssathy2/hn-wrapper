@@ -1,6 +1,7 @@
 // Redis related
 var redis;
 
+console.log(process.env);
 if (process.env.REDISTOGO_URL) {
     // TODO: redistogo connection
 	// inside if statement
