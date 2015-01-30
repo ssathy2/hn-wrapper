@@ -1,5 +1,5 @@
 // Redis related
-var redis;   = 
+var redis;
 
 if (process.env.REDISTOGO_URL) {
     // TODO: redistogo connection
