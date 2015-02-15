@@ -11,11 +11,10 @@ if (process.env['REDISTOGO_URL']) {
 	redisClient = redis.createClient(rtg.port, rtg.hostname);
 	redis.auth(rtg.auth.split(":")[1]);
 } else {
-	redisClient = redis.createClient();    
+    redisClient = redis.createClient();
 }
 
-
-var Rx = require('Rx');
+var Rx = require('rx');
 
 // Returns an observable for a redis value for a given key
 function valueForKey(key){
