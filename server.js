@@ -1,3 +1,5 @@
+require('newrelic');
+
 var restify = require('restify');
 var request = require('request');
 
