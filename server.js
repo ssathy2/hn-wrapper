@@ -76,7 +76,7 @@ server.get(/.*/, restify.serveStatic({
 }));
 
 var port = process.env.PORT || 5000;
-console.log('Port: %i', port);
+console.log('Port:', port);
 server.listen(port, function () {
  console.log('%s listening at %s', server.name, server.url);
 });
