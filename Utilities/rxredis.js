@@ -1,9 +1,6 @@
 // Redis related
 var redis = require("redis");
 var redisClient;
-
-console.log(process.env);
-console.log(process.env['REDISTOGO_URL']);
 if (process.env['REDISTOGO_URL']) {
     // TODO: redistogo connection
 	// inside if statement
