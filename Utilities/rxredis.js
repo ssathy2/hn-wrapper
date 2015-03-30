@@ -1,14 +1,12 @@
 // Redis related
 var redis = require("redis");
 var redisClient;
-
-if (process.env["REDISTOGO_URL"]) {
+if (process.env['REDISTOGO_URL']) {
     // TODO: redistogo connection
 	// inside if statement
-	var rtg   = require("url").parse(process.env["REDISTOGO_URL"]);
+	var rtg   = require("url").parse(process.env['REDISTOGO_URL']);
 	redisClient = redis.createClient(rtg.port, rtg.hostname);
 	redisClient.auth(rtg.auth.split(":")[1]);
-
 } else {
     redisClient = redis.createClient();
 }
