@@ -30,8 +30,8 @@ function valueForKey(key){
 	})
 }
 
-// Returns an observable that retuns the value once it's been set in redis
-function setValueForKey(key, value){
+// Returns an observable that retuns the value once it's been set in redis with a timeout value
+function setValueForKey(key, value, shouldTimeout, timeout){
 	return Rx.Observable.create(function(observer){
 		var jsonValue = JSON.stringify(value);
 		redisClient.set(key, jsonValue, function(error){
@@ -41,8 +41,9 @@ function setValueForKey(key, value){
 				observer.onNext(value);
 				observer.onCompleted();
 			}
-
 		});
+		if (shouldTimeout)
+			redisClient.expire(key, timeout)		
 	})
 }
 
