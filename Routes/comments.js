@@ -137,11 +137,13 @@ function getComments(req, res, next){
     )
 }
 
+var SECONDSINONEMINUTE = 60;
+
 function storeKidsForParentID(parentID, kids){
     var obj = {
         COMMENTTREEKEY       : kids
     }
-    return rxredis.setValueForKey(parentID, obj);
+    return rxredis.setValueForKey(parentID, obj, true, SECONDSINONEMINUTE);
 }
 
 function getEntryForParentID(parentID){
