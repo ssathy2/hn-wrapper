@@ -28,10 +28,22 @@ function valueForKey(key){
 	})
 }
 
+function getAllMethods(obj)
+{
+	var methods = [];
+	for (var m in obj) {
+	    if (typeof obj[m] == "function") {
+	        methods.push(m);
+    	}
+	}
+	return methods.join(",");
+}
+
 // Returns an observable that retuns the value once it's been set in redis
-function setValueForKey(key, value){
+function setValueForKey(key, value, timeout){
 	return Rx.Observable.create(function(observer){
 		var jsonValue = JSON.stringify(value);
+		redisClient.expire(key, 6000)
 		redisClient.set(key, jsonValue, function(error){
 			if (error)
 				observer.error(error)

@@ -10,12 +10,12 @@ var rxredis = require('../Utilities/rxredis');
 /**
     The data structure we're storing into redis looks like:
     id : {
-        timeLastRefreshed : <Time Stamp>,
         commentTree       : <comment tree array>
     }
+    
+    We set the expire time of the key to be 60 seconds or 6000 msecs
 */
 
-var TIMELASTREFRESHEDKEY = 'TIMELASTREFRESHEDKEY';
 var COMMENTTREEKEY       = 'COMMENTTREEKEY';
 
 // Have a full comment/story object here...
@@ -96,7 +96,8 @@ function getComments(req, res, next){
 
         },
         function(){
-            if (!entry || shouldRefreshComments(entry[TIMELASTREFRESHEDKEY])){
+            if (!entry){
+                var startDate = new Date();
                 console.log('Refreshing cache...');
                 //fetch comments
                full_getComments(storyID)
@@ -117,7 +118,10 @@ function getComments(req, res, next){
 
                             },
                             function(){
-                                console.log('Complete')
+                                var endDate = new Date();
+                                var difference = (endDate - startDate);
+                                console.log('Complete');
+                                console.log('Fetch time: ' + difference + ' msecs');
                                 next();
                             }
                         )
@@ -133,17 +137,8 @@ function getComments(req, res, next){
     )
 }
 
-var MILLISECONDSINONESECOND = 60*1000;
-
-function shouldRefreshComments(dateLastRefreshedTimeStamp){
-    console.log('Date last refreshed: ' + dateLastRefreshedTimeStamp);
-    console.log('Date now: ' + Date.now());
-    return (Date.now() - dateLastRefreshedTimeStamp >= MILLISECONDSINONESECOND)
-}
-
 function storeKidsForParentID(parentID, kids){
     var obj = {
-        TIMELASTREFRESHEDKEY : Date.now(),
         COMMENTTREEKEY       : kids
     }
     return rxredis.setValueForKey(parentID, obj);
