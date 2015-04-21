@@ -95,7 +95,7 @@ server.get(/.*/, restify.serveStatic({
 
 var port = process.env.PORT || 5000;
 console.log('Port:', port);
-console.log('Env variables: ' + process.env);
+console.log('Env variables: ' + process.env['REDIS_URL']);
 server.listen(port, function () {
  console.log('%s listening at %s', server.name, server.url);
 });
