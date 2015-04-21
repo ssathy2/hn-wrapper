@@ -8,11 +8,11 @@ exports.config = {
   /**
    * Array of application names.
    */
-  app_name : ['hn-wrapper-digitalocean-ny2'],
+  app_name : ['hackernews-api-newyork1.siddsathyam.com'],
   /**
    * Your New Relic license key.
    */
-  0975a028c6493721f3de87ef93e2af1a1a89fe43',
+  license_key : '0975a028c6493721f3de87ef93e2af1a1a89fe43',
   logging : {
     /**
      * Level at which to log. 'trace' is most useful to New Relic when diagnosing
