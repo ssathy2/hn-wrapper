@@ -34,7 +34,8 @@ function valueForKey(key){
 function setValueForKey(key, value, shouldTimeout, timeout){
 	return Rx.Observable.create(function(observer){
 		var jsonValue = JSON.stringify(value);
-		redisClient.expire(key, 6000)
+		if (shouldTimeout)
+			redisClient.expire(key, timeout)
 		redisClient.set(key, jsonValue, function(error){
 			if (error)
 				observer.error(error)

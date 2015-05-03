@@ -16,4 +16,4 @@ fi
 
 ##
 ## Node
-nodemon server.js
+nodemon server.js | bunyan
