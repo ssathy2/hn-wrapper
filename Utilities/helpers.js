@@ -18,6 +18,16 @@ function verifyRequest(req, res, next){
 		return true;
 }
 
+function isJson(str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
+
+
 // TODO: IMPLEMENT CACHING
 var fetchStories = function(url, req, res, next, useCache) {
 	var storyIds = [];
@@ -30,7 +40,8 @@ var fetchStories = function(url, req, res, next, useCache) {
 		return;
 
 	var currentStoryId;
-
+	var story;
+	
 	get(url)
 	.map(function(res){
 		return res[1];
@@ -40,34 +51,47 @@ var fetchStories = function(url, req, res, next, useCache) {
 		return storyIds;
 	})
 	.flatMap(function(res){
-		return Rx.Observable.fromArray(res);
+		return Rx.Observable.from(res);
 	})
 	.skip(fromStory)
 	.take(toStory - fromStory)
+	.flatMap(function(storyID){
+		currentStoryId = storyID;
+		return rxredis.valueForKey(storyID);
+	})
 	.flatMap(function(res){
-		return get(rootUrl + version + '/item/' + res + '.json');
+		if (res != undefined)
+			return Rx.Observable.return(res);
+		else
+			return get(rootUrl + version + '/item/' + currentStoryId + '.json'); 
 	})
 	.map(function(res){
-		if (Array.isArray(res))
+		if (res[1])
 			return res[1];
 		else
 			return res;
 	})
-	.map(function(res){
-		return JSON.parse(res);
+	.map(function(rawJSON){
+		if (isJson(rawJSON))
+			return JSON.parse(rawJSON);
+		else
+			return rawJSON;
 	})
 	.subscribe(
-			function(x){
-				stories[storyIds.indexOf(x.id)] = x;
-			},
-			function(err){
-				logger.error(err);
-			},
-			function() {
-				res.send(stories.filter(function(arrayValue){
-					return arrayValue != null;
-				}));
-			}
+		function(x){
+			if (useCache)	
+				rxredis.setValueForKey(x.id, x, true, 60);					
+			stories[storyIds.indexOf(x.id)] = x;
+		},
+		function(err){
+			logger.error(err);			
+		},
+		function(){
+			logger.info('Completed for outer sub');
+			res.send(stories.filter(function(arrayValue){
+				return arrayValue != null;
+			}));
+		}
 	);
 };
 

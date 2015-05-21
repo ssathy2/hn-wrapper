@@ -18,12 +18,12 @@ server.use(restify.acceptParser(server.acceptable));
 server.use(restify.queryParser());
 server.use(restify.bodyParser());
 
-server.get('/getComments', comments.getComments);
-server.get('/getTopStories', topStories.getTopStories); 
-server.get('/getNewStories', newStories.getNewStories);
-server.get('/getAskHNStories', askhnStories.getAskHNStories);
-server.get('/getShowHNStories', showhnStories.getShowHNStories);
-server.get('/getJobHNStories', jobhnStories.getJobHNStories);
+server.get('/comments', comments.getComments);
+server.get('/topstories', topStories.getTopStories); 
+server.get('/newstories', newStories.getNewStories);
+server.get('/askhnstories', askhnStories.getAskHNStories);
+server.get('/showhnstories', showhnStories.getShowHNStories);
+server.get('/jobhnstories', jobhnStories.getJobHNStories);
 
 server.get(/.*/, restify.serveStatic({
     'directory': '.',
