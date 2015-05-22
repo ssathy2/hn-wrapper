@@ -28,9 +28,10 @@ function valueForKey(key){
 function setValueForKey(key, value, shouldTimeout, timeout){
 	// wrap redisClient.set
 	var jsonValue = JSON.stringify(value);
-	redisClient.set(key, jsonValue);	
+	var source = Rx.Observable.fromNodeCallback(redisClient.set.bind(redisClient))(key, jsonValue);	
 	if (shouldTimeout)
 		redisClient.expire(key, timeout);		
+	return source;
 }
 
 module.exports.valueForKey = valueForKey;

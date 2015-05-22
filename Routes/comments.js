@@ -1,22 +1,9 @@
 var Rx = require('rx');
 var request = require('request');
-
-var rootUrl = 'https://hacker-news.firebaseio.com';
-var version = '/v0'
-var get = Rx.Observable.fromNodeCallback(request);
-
+var helpers = require('../Utilities/helpers');
+var logger  = require('../Utilities/logger')
+var get     = Rx.Observable.fromNodeCallback(request);
 var rxredis = require('../Utilities/rxredis');
-
-/**
-    The data structure we're storing into redis looks like:
-    id : {
-        commentTree       : <comment tree array>
-    }
-    
-    We set the expire time of the key to be 60 seconds or 6000 msecs
-*/
-
-var COMMENTTREEKEY       = 'COMMENTTREEKEY';
 
 // Have a full comment/story object here...
 // properly process the kids array of the comment/story object
@@ -40,7 +27,7 @@ function getComments_recursive(commentObject){
 }
 
 function getItem(itemID){
-	return get(rootUrl+version+'/item/'+itemID+'.json')
+	return get(helpers.hnAPIRootURL+helpers.hnAPIVersion+'/item/'+itemID+'.json')
 		.map(function(res){
 			return res[1];
 		})
@@ -98,7 +85,7 @@ function getComments(req, res, next){
         function(){
             if (!entry){
                 var startDate = new Date();
-                console.log('Refreshing cache...');
+                logger.info('Refreshing cache...');
                 //fetch comments
                full_getComments(storyID)
                 .subscribe(
@@ -112,7 +99,8 @@ function getComments(req, res, next){
                         storeKidsForParentID(comments.id, comments.kids)
                         .subscribe(
                             function(onNext){
-                                res.json(onNext[COMMENTTREEKEY]);
+                                logger.info(onNext)
+                                res.json(comments.kids);
                             },
                             function(error){
 
@@ -120,8 +108,8 @@ function getComments(req, res, next){
                             function(){
                                 var endDate = new Date();
                                 var difference = (endDate - startDate);
-                                console.log('Complete');
-                                console.log('Fetch time: ' + difference + ' msecs');
+                                logger.info('Complete');
+                                logger.info('Fetch time: ' + difference + ' msecs');
                                 next();
                             }
                         )
@@ -129,8 +117,8 @@ function getComments(req, res, next){
                 ); 
             }
             else {
-                console.log('Using cache...');
-                res.json(entry[COMMENTTREEKEY])
+                logger.info('Using cache...');
+                res.json(JSON.parse(entry));
                 next();
             }
         }
@@ -140,10 +128,7 @@ function getComments(req, res, next){
 var SECONDSINONEMINUTE = 60;
 
 function storeKidsForParentID(parentID, kids){
-    var obj = {
-        COMMENTTREEKEY       : kids
-    }
-    return rxredis.setValueForKey(parentID, obj, true, SECONDSINONEMINUTE);
+    return rxredis.setValueForKey(parentID, kids, true, SECONDSINONEMINUTE);
 }
 
 function getEntryForParentID(parentID){
