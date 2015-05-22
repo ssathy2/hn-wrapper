@@ -28,9 +28,11 @@ function valueForKey(key){
 function setValueForKey(key, value, shouldTimeout, timeout){
 	// wrap redisClient.set
 	var jsonValue = JSON.stringify(value);
-	var source = Rx.Observable.fromNodeCallback(redisClient.set.bind(redisClient))(key, jsonValue);	
+	var source;
 	if (shouldTimeout)
-		redisClient.expire(key, timeout);		
+		source = Rx.Observable.fromNodeCallback(redisClient.setex.bind(redisClient))(key, timeout, jsonValue);
+	else
+		source = Rx.Observable.fromNodeCallback(redisClient.set.bind(redisClient))(key, jsonValue);	
 	return source;
 }
 
