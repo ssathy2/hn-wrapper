@@ -36,5 +36,10 @@ function setValueForKey(key, value, shouldTimeout, timeout){
 	return source;
 }
 
+function keyExists(key){
+	return Rx.Observable.fromNodeCallback(redisClient.exists.bind(redisClient))(key);
+}
+
 module.exports.valueForKey = valueForKey;
 module.exports.setValueForKey = setValueForKey;
+module.exports.keyExists = keyExists;

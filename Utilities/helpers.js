@@ -46,16 +46,14 @@ var fetchStories = function(url, req, res, next, useCache) {
 		return Rx.Observable.create(function(observer){
 			var isFetchingFromServer = false;
 			if (useCache) {
-				rxredis.valueForKey(storyID)
-				.flatMap(function(cachedValue){
-				 	if (cachedValue)
-					 {
-						logger.info('Using cached value for storyID: ' + storyID);
-					 	return Rx.Observable.return(cachedValue);
-					 }
-					else
-					{
-						logger.info('Grabbing value from server with storyID: ' + storyID);
+				rxredis.keyExists(storyID)
+				.flatMap(function(keyExists){
+					if (keyExists){
+						logger.info('Found key: ' + storyID);						
+						return rxredis.valueForKey(storyID);
+					}
+					else {
+						logger.info('Didn\'t find key: ' + storyID + '...fetching story from ' + rootUrl + version + '/item/' + storyID + '.json');
 						isFetchingFromServer = true;						
 						return get(rootUrl + version + '/item/' + storyID + '.json');
 					}
