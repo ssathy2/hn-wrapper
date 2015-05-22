@@ -18,6 +18,11 @@ server.use(restify.acceptParser(server.acceptable));
 server.use(restify.queryParser());
 server.use(restify.bodyParser());
 
+// Old endpoints
+server.get('/getComments', comments.getComments);
+server.get('/getTopStories', topStories.getTopStories);
+
+// New endpoints
 server.get('/comments', comments.getComments);
 server.get('/topstories', topStories.getTopStories); 
 server.get('/newstories', newStories.getNewStories);
