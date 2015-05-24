@@ -28,7 +28,12 @@ var fetchStories = function(url, req, res, next, useCache) {
 
 	if (!verifyRequest(req, res, next))
 		return;
- 
+
+	var currentStoryId;
+	var story;
+	var isStoryFetchingCompleted = false;
+	
+	var source = 
 	get(url)
 	.map(function(res){
 		return res[1];
@@ -46,14 +51,16 @@ var fetchStories = function(url, req, res, next, useCache) {
 		return Rx.Observable.create(function(observer){
 			var isFetchingFromServer = false;
 			if (useCache) {
-				rxredis.keyExists(storyID)
-				.flatMap(function(keyExists){
-					if (keyExists){
-						logger.info('Found key: ' + storyID);						
-						return rxredis.valueForKey(storyID);
-					}
-					else {
-						logger.info('Didn\'t find key: ' + storyID + '...fetching story from ' + rootUrl + version + '/item/' + storyID + '.json');
+				rxredis.valueForKey(storyID)
+				.flatMap(function(cachedValue){
+				 	if (cachedValue)
+					 {
+						logger.info('Using cached value for storyID: ' + storyID);
+					 	return Rx.Observable.return(cachedValue);
+					 }
+					else
+					{
+						logger.info('Grabbing value from server with storyID: ' + storyID);
 						isFetchingFromServer = true;						
 						return get(rootUrl + version + '/item/' + storyID + '.json');
 					}
@@ -62,12 +69,7 @@ var fetchStories = function(url, req, res, next, useCache) {
 					if (res[1] && isFetchingFromServer)
 					{
 						var jsonVal = JSON.parse(res[1]);
-						rxredis.setValueForKey(jsonVal.id, jsonVal, true, 60)
-						.subscribe(
-							function(reply) { logger.info('Setvalue for key: ' + jsonVal.id + ' reply: ' + reply); },
-							function(err) { logger.error(err); },
-							function() { logger.info('Setvalue for key: ' + jsonVal.id + ' complete'); }
-						);
+						rxredis.setValueForKey(jsonVal.id, jsonVal, true, 60);
 						return jsonVal;
 					}
 					else if (res && !isFetchingFromServer)
@@ -95,19 +97,20 @@ var fetchStories = function(url, req, res, next, useCache) {
 				})
 				.map(function(res){
 					var jsonVal = JSON.parse(res);
-					rxredis.setValueForKey(jsonVal.id, jsonVal, true, 60)
-					.subscribe(
-						function(reply) { logger.info('Setvalue for key: ' + jsonVal.id + ' reply: ' + reply); },
-						function(err) { logger.error(err); },
-						function() { logger.info('Setvalue for key: ' + jsonVal.id + ' complete'); }
-					);
+					rxredis.setValueForKey(jsonVal.id, jsonVal, true, 60);
 					return jsonVal;
 				})
 				.subscribe(
-					function(next) { observer.onNext(next); },
-					function(err) { observer.onError(err); },
-					function() { observer.onCompleted(); }
-				);
+					function(next){
+						observer.onNext(next);	
+					},
+					function(err){
+						observer.onError(err);
+					},
+					function(){
+						observer.onCompleted();
+					}
+				)
 			}
 		})
 	})
@@ -126,6 +129,63 @@ var fetchStories = function(url, req, res, next, useCache) {
 			}));
 		}
 	);	
+//	.concatMap(function (x, i) {
+//		currentStoryId = x;
+//    	return rxredis.valueForKey(x); 
+//    })
+//	.map(function(value){
+//		if (value && useCache)
+//			return value;
+//		else
+//			return get(rootUrl + version + '/item/' + currentStoryId + '.json')
+//	})
+//	.map(function(res){
+//		return res;
+//	})
+	
+//	.subscribe(
+//		function(storyID){
+//			rxredis.valueForKey(storyID)
+//			.flatMap(function(res){
+//				if (res != undefined)
+//					return Rx.Observable.return(res);
+//				else
+//					return get(rootUrl + version + '/item/' + storyID + '.json'); 
+//			})
+//			.map(function(res){
+//				if (res[1])
+//					return res[1];
+//				else
+//					return res;
+//			})
+//			.map(function(rawJSON){
+//				return JSON.parse(rawJSON);
+//			})
+//			.subscribe(
+//				function(x){
+//					if (useCache)	
+//						rxredis.setValueForKey(x.id, x, true, 60);					
+//					stories[storyIds.indexOf(x.id)] = x;
+//				},
+//				function(err){
+//					
+//				},
+//				function(){
+//					
+//				}
+//			);
+//		},
+//		function(err){
+//			logger.error(err);
+//		},
+//		function(){
+//			logger.info('Completed for outer sub');
+//			
+//			res.send(stories.filter(function(arrayValue){
+//				return arrayValue != null;
+//			}));
+//		}
+//	);
 };
 
 module.exports.hnAPIRootURL = rootUrl;

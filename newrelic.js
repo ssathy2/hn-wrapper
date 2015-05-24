@@ -8,7 +8,7 @@ exports.config = {
   /**
    * Array of application names.
    */
-  app_name : ['hackernews-api-newyork1.siddsathyam.com', 'hn-wrapper'],
+  app_name : ['hn-wrapper'],
   /**
    * Your New Relic license key.
    */
