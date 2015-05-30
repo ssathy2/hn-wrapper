@@ -1,5 +1,5 @@
 var rootUrl = 'https://hacker-news.firebaseio.com';
-var version = '/v0'
+var version = 'v0'
 var request = require('request');
 var Rx 		= require('rx');
 var logger	= require('./logger')
@@ -18,7 +18,6 @@ function verifyRequest(req, res, next){
 		return true;
 }
 
-// TODO: IMPLEMENT CACHING
 var fetchStories = function(url, req, res, next, useCache) {
 	var storyIds = [];
 	var stories = [];
@@ -28,14 +27,13 @@ var fetchStories = function(url, req, res, next, useCache) {
 
 	if (!verifyRequest(req, res, next))
 		return;
-
-	var currentStoryId;
-	var story;
-	var isStoryFetchingCompleted = false;
-	
-	var source = 
+		
+	var startDate = new Date();
 	get(url)
 	.map(function(res){
+		var currentDate = new Date();
+		var time = currentDate.getTime() - startDate.getTime();
+		logger.info("Took " + time + " msecs to fetch all top stories from " + url);
 		return res[1];
 	})
 	.map(function(res){
@@ -62,7 +60,7 @@ var fetchStories = function(url, req, res, next, useCache) {
 					{
 						logger.info('Grabbing value from server with storyID: ' + storyID);
 						isFetchingFromServer = true;						
-						return get(rootUrl + version + '/item/' + storyID + '.json');
+						return get(hnURL('/item/' + storyID + '.json'));
 					}
 				})
 				.map(function(res){
@@ -91,7 +89,7 @@ var fetchStories = function(url, req, res, next, useCache) {
 			}
 			else {
 				logger.info('Grabbing value from server with storyID: ' + storyID);				
-				get(rootUrl + version + '/item/' + storyID + '.json')
+				get(hnURL('/item/' + storyID + '.json'))
 				.map(function(res){
 					return res[1]
 				})
@@ -122,73 +120,21 @@ var fetchStories = function(url, req, res, next, useCache) {
 			logger.error(err);
 		},
 		function(){
-			logger.info('Completed for outer sub');
-			
+			logger.info('Full stories fetch complete!');
+			var currentDate = new Date();
+			var time = currentDate.getTime() - startDate.getTime();
+			logger.info("Took " + time + "msecs to fetch stories for request url: " + req.url);
 			res.send(stories.filter(function(arrayValue){
 				return arrayValue != null;
 			}));
 		}
 	);	
-//	.concatMap(function (x, i) {
-//		currentStoryId = x;
-//    	return rxredis.valueForKey(x); 
-//    })
-//	.map(function(value){
-//		if (value && useCache)
-//			return value;
-//		else
-//			return get(rootUrl + version + '/item/' + currentStoryId + '.json')
-//	})
-//	.map(function(res){
-//		return res;
-//	})
-	
-//	.subscribe(
-//		function(storyID){
-//			rxredis.valueForKey(storyID)
-//			.flatMap(function(res){
-//				if (res != undefined)
-//					return Rx.Observable.return(res);
-//				else
-//					return get(rootUrl + version + '/item/' + storyID + '.json'); 
-//			})
-//			.map(function(res){
-//				if (res[1])
-//					return res[1];
-//				else
-//					return res;
-//			})
-//			.map(function(rawJSON){
-//				return JSON.parse(rawJSON);
-//			})
-//			.subscribe(
-//				function(x){
-//					if (useCache)	
-//						rxredis.setValueForKey(x.id, x, true, 60);					
-//					stories[storyIds.indexOf(x.id)] = x;
-//				},
-//				function(err){
-//					
-//				},
-//				function(){
-//					
-//				}
-//			);
-//		},
-//		function(err){
-//			logger.error(err);
-//		},
-//		function(){
-//			logger.info('Completed for outer sub');
-//			
-//			res.send(stories.filter(function(arrayValue){
-//				return arrayValue != null;
-//			}));
-//		}
-//	);
 };
 
-module.exports.hnAPIRootURL = rootUrl;
-module.exports.hnAPIVersion = version;
+function hnURL(endPoint){
+	return rootUrl + '/' + version + '/' + endPoint;
+}
+
+module.exports.hnURL		= hnURL;
 module.exports.rxNodeCallback = get;
 module.exports.fetchStories = fetchStories;

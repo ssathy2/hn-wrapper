@@ -3,7 +3,7 @@ var logger = require('../Utilities/logger')
 
 function getShowHNStories(req, res, next){
 	logger.info('getShowHNStories: ' + req);
-	helpers.fetchStories(helpers.hnAPIRootURL + helpers.hnAPIVersion + '/showstories.json', req, res, next, false);
+	helpers.fetchStories(helpers.hnURL('showstories.json'), req, res, next, false);
 	logger.info('getShowHNStories response: ' + res);	
 }
 

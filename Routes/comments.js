@@ -27,7 +27,7 @@ function getComments_recursive(commentObject){
 }
 
 function getItem(itemID){
-	return get(helpers.hnAPIRootURL+helpers.hnAPIVersion+'/item/'+itemID+'.json')
+	return get(helpers.hnURL('item/'+itemID+'.json'))
 		.map(function(res){
 			return res[1];
 		})
@@ -72,7 +72,8 @@ function getComments(req, res, next){
         next();
         return;
     }
-
+    
+    var startDate = new Date();
     var entry;
     getEntryForParentID(storyID)
     .subscribe(
@@ -83,8 +84,9 @@ function getComments(req, res, next){
 
         },
         function(){
+            logger.info("Took " + (new Date() - startDate) + " seconds for redis get"); 
             if (!entry){
-                var startDate = new Date();
+                
                 logger.info('Refreshing cache...');
                 //fetch comments
                full_getComments(storyID)

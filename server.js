@@ -1,6 +1,7 @@
 require('newrelic');
 var restify = require('restify');
 var logger  = require('./Utilities/logger');
+var indexer  = require('./Utilities/indexer');
 
 var comments = require('./Routes/comments');
 var topStories = require('./Routes/topstories');
@@ -29,6 +30,8 @@ server.get('/newstories', newStories.getNewStories);
 server.get('/askhnstories', askhnStories.getAskHNStories);
 server.get('/showhnstories', showhnStories.getShowHNStories);
 server.get('/jobhnstories', jobhnStories.getJobHNStories);
+
+//indexer.start();
 
 server.get(/.*/, restify.serveStatic({
     'directory': '.',
