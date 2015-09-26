@@ -8,8 +8,11 @@ var rxredis = require('../Utilities/rxredis');
 // Have a full comment/story object here...
 // properly process the kids array of the comment/story object
 function getComments_recursive(commentObject){
-    if (!commentObject || !commentObject.kids) 
+    if (!commentObject)
         return Rx.Observable.empty();
+
+    if (!commentObject.kids)
+    return Rx.Observable.just([]);
 
     var idx = 0;
     return Rx.Observable.fromArray(commentObject.kids)
@@ -45,12 +48,11 @@ function full_getComments(storyID){
     return Rx.Observable.create(function(observer){
         getItem(storyID)
         .flatMap(function(parsedItem){
-            item = parsedItem;
-            return getComments_recursive(parsedItem)
+            return getComments_recursive(parsedItem);
         })
         .subscribe(
             function(onNextValue){
-
+                item = onNextValue;
             },
             function(error){
                 observer.onError(error);
