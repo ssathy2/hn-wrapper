@@ -1,11 +1,14 @@
 {
-  "name": "hackernews-firebase-api",
+  "name": "HN-Wrapper",
   "version": "1.0.0",
   "description": "wrapper around official hacker news api",
   "main": "app.js",
   "scripts": {
     "test": "node app.js"
   },
+  "engines": {
+      "node": "4.0.0"
+  }
   "keywords": [
     "hacker",
     "news",
