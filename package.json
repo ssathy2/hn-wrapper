@@ -6,10 +6,6 @@
   "scripts": {
     "test": "node app.js"
   },
-  "engines": {
-      "node": "4.0.0",
-      "npm" : "^3.3.4"
-  },
   "keywords": [
     "hacker",
     "news",
