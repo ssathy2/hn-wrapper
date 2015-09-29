@@ -48,16 +48,18 @@ function full_getComments(storyID){
     return Rx.Observable.create(function(observer){
         getItem(storyID)
         .flatMap(function(parsedItem){
+            item = parsedItem;
             return getComments_recursive(parsedItem);
         })
         .subscribe(
             function(onNextValue){
-                item = onNextValue;
+
             },
             function(error){
                 observer.onError(error);
             },
             function(){
+
                 observer.onNext(item);
                 observer.onCompleted();
             }
