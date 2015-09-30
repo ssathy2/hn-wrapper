@@ -59,7 +59,6 @@ function full_getComments(storyID){
                 observer.onError(error);
             },
             function(){
-
                 observer.onNext(item);
                 observer.onCompleted();
             }

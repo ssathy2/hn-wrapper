@@ -7,10 +7,10 @@ var rxredis = require('./rxredis')
 var get = Rx.Observable.fromNodeCallback(request);
 
 function verifyRequest(req, res, next){
-	var fromStory = req.query.fromStory;
-	var toStory	= req.query.toStory;
+	var fromStory = parseInt(req.query.fromStory);
+	var toStory	= parseInt(req.query.toStory);
 	
-	if (toStory < fromStory){
+    if (toStory < fromStory){
 		res.send(400, {'error' : 'fromStory cannot be greater than toStory'});
 		return false;	
 	}
