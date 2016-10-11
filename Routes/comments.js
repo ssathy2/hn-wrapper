@@ -30,7 +30,9 @@ function getComments_recursive(commentObject){
 }
 
 function getItem(itemID){
-	return get(helpers.hnURL('item/'+itemID+'.json'))
+    var url = helpers.hnURL('item/'+itemID+'.json')
+    logger.info("Retrieving URL: " + url)
+	return get(url)
 		.map(function(res){
 			return res[1];
 		})
@@ -66,9 +68,7 @@ function full_getComments(storyID){
     });
 }
 
-function getComments(req, res, next){
-    var comments;
-    var storyID = req.query.storyID;
+function getCommentsWithStoryID(storyID) {
     if (!storyID)
     {
         res.send('400', 'Invalid request (No storyID provided)');
@@ -76,6 +76,7 @@ function getComments(req, res, next){
         return;
     }
     
+    var comments;
     var startDate = new Date();
     var entry;
     getEntryForParentID(storyID)
@@ -130,6 +131,14 @@ function getComments(req, res, next){
     )
 }
 
+function getComments_v2(req, res, next){
+    getCommentsWithStoryID(req.params.id)
+}
+
+function getComments(req, res, next){
+    getCommentsWithStoryID(req.query.storyID)
+}
+
 var SECONDSINONEMINUTE = 60;
 
 function storeKidsForParentID(parentID, kids){
@@ -141,3 +150,4 @@ function getEntryForParentID(parentID){
 }
 
 module.exports.getComments = getComments;
+module.exports.getComments_v2 = getComments_v2;

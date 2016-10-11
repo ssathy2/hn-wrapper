@@ -19,17 +19,25 @@ server.use(restify.acceptParser(server.acceptable));
 server.use(restify.queryParser());
 server.use(restify.bodyParser());
 
-// Old endpoints
+// "v0" endpoints
 server.get('/getComments', comments.getComments);
 server.get('/getTopStories', topStories.getTopStories);
 
-// New endpoints
+// "v1" endpoints
 server.get('/comments', comments.getComments);
 server.get('/topstories', topStories.getTopStories); 
 server.get('/newstories', newStories.getNewStories);
 server.get('/askhnstories', askhnStories.getAskHNStories);
 server.get('/showhnstories', showhnStories.getShowHNStories);
 server.get('/jobhnstories', jobhnStories.getJobHNStories);
+
+// "v2" endpoints
+server.get('/v2/top', topStories.getTopStories_v2)
+server.get('/v2/comments/:id', comments.getComments_v2)
+server.get('/v2/new', newStories.getNewStories_v2)
+server.get('/v2/askhn', askhnStories.getAskHNStories_v2)
+server.get('/v2/showhn', showhnStories.getShowHNStories_v2)
+server.get('/v2/jobhn', jobhnStories.getJobHNStories_v2)
 
 //indexer.start();
 

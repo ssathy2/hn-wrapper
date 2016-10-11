@@ -6,10 +6,7 @@ var logger	= require('./logger')
 var rxredis = require('./rxredis')
 var get = Rx.Observable.fromNodeCallback(request);
 
-function verifyRequest(req, res, next){
-	var fromStory = parseInt(req.query.fromStory);
-	var toStory	= parseInt(req.query.toStory);
-	
+function verifyRequest(fromStory, toStory, res, next){
     if (toStory < fromStory){
 		res.send(400, {'error' : 'fromStory cannot be greater than toStory'});
 		return false;	
@@ -18,16 +15,13 @@ function verifyRequest(req, res, next){
 		return true;
 }
 
-var fetchStories = function(url, req, res, next, useCache) {
+var fetchStories_helper = function(url, clientRequestUrl, fromCount, toCount, res, next, useCache) { 
+	if (!verifyRequest(fromCount, toCount, res, next))
+		return;
+		
 	var storyIds = [];
 	var stories = [];
 
-	var fromStory = (req.query.fromStory) ? req.query.fromStory : 0;
-	var toStory = (req.query.toStory) ? req.query.toStory : 100;
-
-	if (!verifyRequest(req, res, next))
-		return;
-		
 	var startDate = new Date();
 	get(url)
 	.map(function(res){
@@ -43,8 +37,8 @@ var fetchStories = function(url, req, res, next, useCache) {
 	.flatMap(function(res){
 		return Rx.Observable.fromArray(res);
 	})
-	.skip(fromStory)
-	.take(toStory - fromStory)
+	.skip(fromCount)
+	.take(toCount - fromCount)
 	.flatMap(function(storyID){
 		return Rx.Observable.create(function(observer){
 			var isFetchingFromServer = false;
@@ -123,12 +117,20 @@ var fetchStories = function(url, req, res, next, useCache) {
 			logger.info('Full stories fetch complete!');
 			var currentDate = new Date();
 			var time = currentDate.getTime() - startDate.getTime();
-			logger.info("Took " + time + "msecs to fetch stories for request url: " + req.url);
+			logger.info("Took " + time + "msecs to fetch stories for request url: " + clientRequestUrl);
 			res.send(stories.filter(function(arrayValue){
 				return arrayValue != null;
 			}));
 		}
-	);	
+	);
+} 
+
+var fetchStories_v2 = function(url, req, res, next, useCache) {
+	fetchStories_helper(url, req.url, req.query.from, req.query.to, res, next, useCache)
+}
+
+var fetchStories = function(url, req, res, next, useCache) {
+	fetchStories_helper(url, req.url, req.query.fromStory, req.query.toStory, res, next, useCache)
 };
 
 function hnURL(endPoint){
@@ -138,3 +140,4 @@ function hnURL(endPoint){
 module.exports.hnURL		= hnURL;
 module.exports.rxNodeCallback = get;
 module.exports.fetchStories = fetchStories;
+module.exports.fetchStories_v2 = fetchStories_v2;
