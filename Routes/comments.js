@@ -68,7 +68,7 @@ function full_getComments(storyID){
     });
 }
 
-function getCommentsWithStoryID(storyID) {
+function getCommentsWithStoryID(storyID, res, req, next) {
     if (!storyID)
     {
         res.send('400', 'Invalid request (No storyID provided)');
@@ -132,11 +132,11 @@ function getCommentsWithStoryID(storyID) {
 }
 
 function getComments_v2(req, res, next){
-    getCommentsWithStoryID(req.params.id)
+    getCommentsWithStoryID(req.params.id, res, req, next)
 }
 
 function getComments(req, res, next){
-    getCommentsWithStoryID(req.query.storyID)
+    getCommentsWithStoryID(req.query.storyID, res, req, next)
 }
 
 var SECONDSINONEMINUTE = 60;
