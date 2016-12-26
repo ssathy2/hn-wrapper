@@ -7,6 +7,7 @@ var rxredis = require('./rxredis')
 var get = Rx.Observable.fromNodeCallback(request);
 
 function verifyRequest(fromStory, toStory, res, next){
+	logger.info("From: " + fromStory + " to: " + toStory)
     if (toStory < fromStory){
 		res.send(400, {'error' : 'fromStory cannot be greater than toStory'});
 		return false;	
@@ -126,11 +127,11 @@ var fetchStories_helper = function(url, clientRequestUrl, fromCount, toCount, re
 } 
 
 var fetchStories_v2 = function(url, req, res, next, useCache) {
-	fetchStories_helper(url, req.url, req.query.from, req.query.to, res, next, useCache)
+	fetchStories_helper(url, req.url, parseInt(req.query.from), parseInt(req.query.to), res, next, useCache)
 }
 
 var fetchStories = function(url, req, res, next, useCache) {
-	fetchStories_helper(url, req.url, req.query.fromStory, req.query.toStory, res, next, useCache)
+	fetchStories_helper(url, req.url, parseInt(req.query.fromStory), parseInt(req.query.toStory), res, next, useCache)
 };
 
 function hnURL(endPoint){
